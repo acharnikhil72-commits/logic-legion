@@ -1,8 +1,3 @@
-// ============================================
-// LOGIC LEGION - CLOUD-READY SERVER
-// Deploy to Render.com (FREE)
-// ============================================
-
 const express = require('express');
 const { MongoClient } = require('mongodb');
 const cors = require('cors');
@@ -10,7 +5,6 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// MongoDB Connection - Uses environment variable in production
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://acharnikhil72_db_user:vFtlFTq6FnV8RnvG@cluster0.mh9tblw.mongodb.net/?appName=Cluster0";
 
 app.use(cors());
@@ -25,7 +19,6 @@ async function connectToMongoDB() {
         const client = new MongoClient(MONGODB_URI);
         await client.connect();
         console.log('✅ MongoDB Connected');
-        
         db = client.db('logic_legion_db');
         registrationsCollection = db.collection('registrations');
     } catch (error) {
@@ -35,9 +28,8 @@ async function connectToMongoDB() {
 
 connectToMongoDB();
 
-// Routes
 app.get('/', (req, res) => {
-    res.send(getRegistrationHTML());
+    res.send(getHTML());
 });
 
 app.post('/register', async (req, res) => {
@@ -61,11 +53,11 @@ app.post('/register', async (req, res) => {
             skills: skills.trim(),
             reason: reason.trim(),
             registeredAt: new Date(),
-            registrationId: `LL${Date.now()}`
+            registrationId: 'LL' + Date.now()
         };
 
         await registrationsCollection.insertOne(registration);
-        console.log(`✅ Registration: ${name} - ${registration.registrationId}`);
+        console.log('✅ Registration:', name, '-', registration.registrationId);
         
         res.json({ success: true, id: registration.registrationId });
     } catch (error) {
@@ -79,7 +71,6 @@ app.get('/registrations', async (req, res) => {
         if (!db) {
             return res.status(503).json({ success: false, error: 'Database not connected' });
         }
-
         const registrations = await registrationsCollection.find({}).sort({ registeredAt: -1 }).toArray();
         res.json({ success: true, count: registrations.length, data: registrations });
     } catch (error) {
@@ -95,8 +86,8 @@ app.get('/health', (req, res) => {
     res.json({ status: 'OK', mongodb: db ? 'Connected' : 'Disconnected' });
 });
 
-function getRegistrationHTML() {
-    return \`<!DOCTYPE html>
+function getHTML() {
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -109,10 +100,19 @@ function getRegistrationHTML() {
             --glass-bg: rgba(15, 15, 15, 0.9);
             --input-bg: rgba(255, 255, 255, 0.03);
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Orbitron', 'Segoe UI', sans-serif; }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Orbitron', 'Segoe UI', sans-serif;
+        }
+
         body {
             background: var(--deep-space);
-            background-image: radial-gradient(circle at 20% 30%, rgba(57, 255, 20, 0.08) 0%, transparent 40%), radial-gradient(circle at 80% 70%, rgba(57, 255, 20, 0.08) 0%, transparent 40%);
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(57, 255, 20, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(57, 255, 20, 0.08) 0%, transparent 40%);
             color: #fff;
             min-height: 100vh;
             display: flex;
@@ -120,6 +120,7 @@ function getRegistrationHTML() {
             justify-content: center;
             padding: 20px;
         }
+
         .card {
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
@@ -131,6 +132,7 @@ function getRegistrationHTML() {
             box-shadow: 0 0 50px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(57, 255, 20, 0.05);
             position: relative;
         }
+
         .card::after {
             content: '';
             position: absolute;
@@ -140,7 +142,12 @@ function getRegistrationHTML() {
             z-index: -1;
             opacity: 0.3;
         }
-        .header { text-align: center; margin-bottom: 35px; }
+
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
         .logo {
             width: 120px;
             height: 120px;
@@ -155,11 +162,13 @@ function getRegistrationHTML() {
             justify-content: center;
             font-size: 3rem;
         }
+
         @keyframes pulse {
             0% { box-shadow: 0 0 10px var(--neon-green); }
             50% { box-shadow: 0 0 25px var(--neon-green); }
             100% { box-shadow: 0 0 10px var(--neon-green); }
         }
+
         h1 {
             color: var(--neon-green);
             text-transform: uppercase;
@@ -167,8 +176,15 @@ function getRegistrationHTML() {
             font-size: 1.8rem;
             text-shadow: 0 0 10px var(--neon-green);
         }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
         .full-width { grid-column: span 2; }
+
         label {
             display: block;
             font-size: 0.7rem;
@@ -178,6 +194,7 @@ function getRegistrationHTML() {
             letter-spacing: 1.5px;
             font-weight: bold;
         }
+
         input, textarea {
             width: 100%;
             background: var(--input-bg);
@@ -188,13 +205,16 @@ function getRegistrationHTML() {
             font-size: 0.95rem;
             transition: 0.3s;
         }
+
         input:focus, textarea:focus {
             outline: none;
             border-color: var(--neon-green);
             box-shadow: 0 0 10px rgba(57, 255, 20, 0.2);
             background: rgba(57, 255, 20, 0.05);
         }
+
         textarea { height: 80px; resize: none; }
+
         button {
             background: transparent;
             color: var(--neon-green);
@@ -210,17 +230,24 @@ function getRegistrationHTML() {
             width: 100%;
             margin-top: 30px;
         }
+
         button:hover {
             background: var(--neon-green);
             color: #000;
             box-shadow: 0 0 30px var(--neon-green);
             transform: scale(1.02);
         }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         .admin-link {
             text-align: center;
             margin-top: 20px;
         }
+
         .admin-link a {
             color: var(--neon-green);
             text-decoration: none;
@@ -228,10 +255,12 @@ function getRegistrationHTML() {
             opacity: 0.7;
             transition: 0.3s;
         }
+
         .admin-link a:hover {
             opacity: 1;
             text-shadow: 0 0 10px var(--neon-green);
         }
+
         @media (max-width: 600px) {
             .form-grid { grid-template-columns: 1fr; }
             .full-width { grid-column: span 1; }
@@ -278,40 +307,45 @@ function getRegistrationHTML() {
             <button type="submit" id="submitBtn">Submit Membership</button>
         </form>
         <div class="admin-link">
-            <a href="/admin">Admin Dashboard →</a>
+            <a href="/admin">Admin Dashboard</a>
         </div>
     </div>
     <script>
-        document.getElementById('legionForm').addEventListener('submit', async (e) => {
+        document.getElementById('legionForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            
             const btn = document.getElementById('submitBtn');
             btn.disabled = true;
             btn.textContent = 'SUBMITTING...';
+
+            const formData = {
+                name: document.getElementById('name').value,
+                section: document.getElementById('section').value,
+                mobile: document.getElementById('mobile').value,
+                email: document.getElementById('email').value,
+                interest: document.getElementById('interest').value,
+                skills: document.getElementById('skills').value,
+                reason: document.getElementById('reason').value
+            };
 
             try {
                 const response = await fetch('/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        name: document.getElementById('name').value,
-                        section: document.getElementById('section').value,
-                        mobile: document.getElementById('mobile').value,
-                        email: document.getElementById('email').value,
-                        interest: document.getElementById('interest').value,
-                        skills: document.getElementById('skills').value,
-                        reason: document.getElementById('reason').value
-                    })
+                    body: JSON.stringify(formData)
                 });
 
                 const data = await response.json();
+
                 if (data.success) {
-                    alert('✅ ACCESS GRANTED!\\n\\nRegistration ID: ' + data.id + '\\n\\nWelcome to Logic Legion!');
+                    alert('ACCESS GRANTED! Registration ID: ' + data.id + ' - Welcome to Logic Legion!');
                     document.getElementById('legionForm').reset();
                 } else {
-                    alert('❌ ERROR: ' + data.error);
+                    alert('ERROR: ' + data.error);
                 }
             } catch (err) {
-                alert('⚠️ CONNECTION FAILED!');
+                alert('CONNECTION FAILED!');
+                console.error(err);
             } finally {
                 btn.disabled = false;
                 btn.textContent = 'Submit Membership';
@@ -319,27 +353,45 @@ function getRegistrationHTML() {
         });
     </script>
 </body>
-</html>\`;
+</html>`;
 }
 
 function getAdminHTML() {
-    return \`<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Logic Legion | Admin Dashboard</title>
     <style>
-        :root { --neon-green: #39FF14; --deep-space: #0a0a0c; --glass-bg: rgba(15, 15, 15, 0.9); }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Orbitron', 'Segoe UI', sans-serif; }
+        :root {
+            --neon-green: #39FF14;
+            --deep-space: #0a0a0c;
+            --glass-bg: rgba(15, 15, 15, 0.9);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Orbitron', 'Segoe UI', sans-serif;
+        }
+
         body {
             background: var(--deep-space);
-            background-image: radial-gradient(circle at 20% 30%, rgba(57, 255, 20, 0.08) 0%, transparent 40%), radial-gradient(circle at 80% 70%, rgba(57, 255, 20, 0.08) 0%, transparent 40%);
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(57, 255, 20, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(57, 255, 20, 0.08) 0%, transparent 40%);
             color: #fff;
             min-height: 100vh;
             padding: 20px;
         }
-        .container { max-width: 1400px; margin: 0 auto; }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
         h1 {
             color: var(--neon-green);
             text-align: center;
@@ -348,12 +400,14 @@ function getAdminHTML() {
             margin-bottom: 30px;
             text-shadow: 0 0 10px var(--neon-green);
         }
+
         .stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
+
         .stat-card {
             background: var(--glass-bg);
             border: 1px solid rgba(57, 255, 20, 0.3);
@@ -361,18 +415,25 @@ function getAdminHTML() {
             padding: 20px;
             text-align: center;
         }
+
         .stat-number {
             font-size: 2.5rem;
             color: var(--neon-green);
             font-weight: bold;
         }
+
         .stat-label {
             color: rgba(255, 255, 255, 0.7);
             text-transform: uppercase;
             font-size: 0.8rem;
             letter-spacing: 2px;
         }
-        .controls { text-align: center; margin-bottom: 20px; }
+
+        .controls {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
         .btn {
             background: transparent;
             color: var(--neon-green);
@@ -388,11 +449,13 @@ function getAdminHTML() {
             text-decoration: none;
             display: inline-block;
         }
+
         .btn:hover {
             background: var(--neon-green);
             color: #000;
             box-shadow: 0 0 20px var(--neon-green);
         }
+
         .table-container {
             background: var(--glass-bg);
             border: 1px solid rgba(57, 255, 20, 0.3);
@@ -400,7 +463,12 @@ function getAdminHTML() {
             padding: 20px;
             overflow-x: auto;
         }
-        table { width: 100%; border-collapse: collapse; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
         th {
             background: rgba(57, 255, 20, 0.1);
             color: var(--neon-green);
@@ -411,13 +479,24 @@ function getAdminHTML() {
             text-align: left;
             border-bottom: 2px solid var(--neon-green);
         }
+
         td {
             padding: 15px 10px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             font-size: 0.85rem;
         }
-        tr:hover { background: rgba(57, 255, 20, 0.05); }
-        .loading { text-align: center; padding: 50px; font-size: 1.2rem; color: var(--neon-green); }
+
+        tr:hover {
+            background: rgba(57, 255, 20, 0.05);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2rem;
+            color: var(--neon-green);
+        }
+
         .error {
             background: rgba(255, 0, 0, 0.1);
             border: 1px solid rgba(255, 0, 0, 0.3);
@@ -431,36 +510,36 @@ function getAdminHTML() {
 </head>
 <body>
     <div class="container">
-        <h1>🚀 Admin Dashboard</h1>
+        <h1>Admin Dashboard</h1>
         <div class="stats">
             <div class="stat-card">
-                <div class="stat-number" id="totalCount">-</div>
+                <div class="stat-number" id="totalCount">0</div>
                 <div class="stat-label">Total Registrations</div>
             </div>
         </div>
         <div class="controls">
-            <button class="btn" onclick="loadRegistrations()">🔄 Refresh</button>
-            <button class="btn" onclick="exportData()">📥 Export CSV</button>
-            <a href="/" class="btn">🏠 Registration Form</a>
+            <button class="btn" onclick="loadRegistrations()">Refresh</button>
+            <button class="btn" onclick="exportCSV()">Export CSV</button>
+            <a href="/" class="btn">Registration Form</a>
         </div>
         <div class="table-container">
-            <div id="content">
-                <div class="loading">Loading...</div>
-            </div>
+            <div id="dataTable"></div>
         </div>
     </div>
     <script>
         async function loadRegistrations() {
-            const contentDiv = document.getElementById('content');
+            const contentDiv = document.getElementById('dataTable');
             contentDiv.innerHTML = '<div class="loading">Loading...</div>';
+
             try {
                 const response = await fetch('/registrations');
                 const result = await response.json();
+
                 if (result.success) {
                     displayRegistrations(result.data);
                     document.getElementById('totalCount').textContent = result.count;
                 } else {
-                    contentDiv.innerHTML = \\\`<div class="error">\\\${result.error}</div>\\\`;
+                    contentDiv.innerHTML = '<div class="error">' + result.error + '</div>';
                 }
             } catch (error) {
                 contentDiv.innerHTML = '<div class="error">Failed to load data!</div>';
@@ -468,31 +547,60 @@ function getAdminHTML() {
         }
 
         function displayRegistrations(data) {
-            const contentDiv = document.getElementById('content');
+            const contentDiv = document.getElementById('dataTable');
+
             if (data.length === 0) {
-                contentDiv.innerHTML = '<div class="loading">No registrations yet! 🎯</div>';
+                contentDiv.innerHTML = '<div class="loading">No registrations yet!</div>';
                 return;
             }
-            let html = \\\`<table><thead><tr><th>ID</th><th>Name</th><th>Section</th><th>Email</th><th>Mobile</th><th>Interest</th><th>Skills</th><th>Date</th></tr></thead><tbody>\\\`;
-            data.forEach(reg => {
+
+            let html = '<table><thead><tr><th>ID</th><th>Name</th><th>Section</th><th>Email</th><th>Mobile</th><th>Interest</th><th>Skills</th><th>Date</th></tr></thead><tbody>';
+
+            data.forEach(function(reg) {
                 const date = new Date(reg.registeredAt).toLocaleString();
-                html += \\\`<tr><td>\\\${reg.registrationId}</td><td>\\\${reg.name}</td><td>\\\${reg.section}</td><td>\\\${reg.email}</td><td>\\\${reg.mobile}</td><td>\\\${reg.interest}</td><td>\\\${reg.skills}</td><td>\\\${date}</td></tr>\\\`;
+                html += '<tr>';
+                html += '<td>' + reg.registrationId + '</td>';
+                html += '<td>' + reg.name + '</td>';
+                html += '<td>' + reg.section + '</td>';
+                html += '<td>' + reg.email + '</td>';
+                html += '<td>' + reg.mobile + '</td>';
+                html += '<td>' + reg.interest + '</td>';
+                html += '<td>' + reg.skills + '</td>';
+                html += '<td>' + date + '</td>';
+                html += '</tr>';
             });
+
             html += '</tbody></table>';
             contentDiv.innerHTML = html;
         }
 
-        function exportData() {
+        function exportCSV() {
             fetch('/registrations')
-                .then(res => res.json())
-                .then(result => {
+                .then(function(res) { return res.json(); })
+                .then(function(result) {
                     if (result.success) {
                         const headers = ['ID', 'Name', 'Section', 'Email', 'Mobile', 'Interest', 'Skills', 'Reason', 'Date'];
-                        const rows = result.data.map(reg => [
-                            reg.registrationId, reg.name, reg.section, reg.email, reg.mobile,
-                            reg.interest, reg.skills, reg.reason, new Date(reg.registeredAt).toLocaleString()
-                        ]);
-                        const csv = [headers, ...rows].map(row => row.map(cell => \\\`"\\\${cell}"\\\`).join(',')).join('\\\\n');
+                        const rows = result.data.map(function(reg) {
+                            return [
+                                reg.registrationId,
+                                reg.name,
+                                reg.section,
+                                reg.email,
+                                reg.mobile,
+                                reg.interest,
+                                reg.skills,
+                                reg.reason,
+                                new Date(reg.registeredAt).toLocaleString()
+                            ];
+                        });
+
+                        const csvRows = [headers].concat(rows);
+                        const csv = csvRows.map(function(row) {
+                            return row.map(function(cell) {
+                                return '"' + cell + '"';
+                            }).join(',');
+                        }).join('\\n');
+
                         const blob = new Blob([csv], { type: 'text/csv' });
                         const url = window.URL.createObjectURL(blob);
                         const a = document.createElement('a');
@@ -507,16 +615,10 @@ function getAdminHTML() {
         setInterval(loadRegistrations, 30000);
     </script>
 </body>
-</html>\`;
+</html>`;
 }
 
-app.listen(PORT, () => {
-    console.log(\\\`
-╔════════════════════════════════════════╗
-║   LOGIC LEGION SERVER ONLINE 🚀       ║
-╠════════════════════════════════════════╣
-║  Port: \\\${PORT}                           ║
-║  Status: ✅ RUNNING                     ║
-╚════════════════════════════════════════╝
-    \\\`);
+app.listen(PORT, function() {
+    console.log('Server running on port', PORT);
 });
+
