@@ -1,7 +1,7 @@
 {
-  "name": "logic-legion-registration",
+  "name": "logic-legion",
   "version": "1.0.0",
-  "description": "Logic Legion Registration Portal with MongoDB",
+  "description": "Logic Legion Registration Portal",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
@@ -13,8 +13,6 @@
     "express": "^4.18.2",
     "mongodb": "^6.3.0",
     "cors": "^2.8.5"
-  },
-  "keywords": ["logic-legion", "registration", "mongodb"],
-  "author": "Logic Legion Team",
-  "license": "MIT"
+  }
 }
+
